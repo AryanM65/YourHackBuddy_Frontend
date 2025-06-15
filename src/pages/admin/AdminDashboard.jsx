@@ -14,7 +14,7 @@ import {
   FaClock,
   FaBan
 } from 'react-icons/fa';
-import { format, parseISO, subDays } from 'date-fns';
+import { format, parseISO, subDays, isWithinInterval } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
@@ -62,32 +62,62 @@ const AdminDashboard = () => {
   , [hackathons]);
 
   const suspendedHackathons = useMemo(() => 
-    hackathons.filter(h => h.status === 'Suspended')
+    hackathons.filter(h => h.status === 'Rejected')
   , [hackathons]);
 
   // Active hackathons are approved and currently running
-  const activeHackathonsCount = useMemo(() => 
-    approvedHackathons.filter(h => 
-      new Date(h.startDate) <= new Date() && new Date(h.endDate) >= new Date()
-    ).length
-  , [approvedHackathons]);
+  const activeHackathonsCount = useMemo(() => {
+    const now = new Date();
+    return approvedHackathons.filter(h => 
+      isWithinInterval(now, {
+        start: new Date(h.startDate),
+        end: new Date(h.endDate)
+      })
+    ).length;
+  }, [approvedHackathons]);
 
-  // Data processing
+  // Fixed UTC date handling for user growth data
   const userGrowthData = useMemo(() => {
     if (!Array.isArray(localUsers) || localUsers.length === 0) return [];
     
     try {
-      const monthlyCounts = localUsers.reduce((acc, user) => {
-        const date = user?.createdAt ? parseISO(user.createdAt) : new Date();
-        const month = format(date, 'MMM yyyy');
-        acc[month] = (acc[month] || 0) + 1;
-        return acc;
-      }, {});
+      // Temporary storage for counts per UTC month
+      const monthlyCounts = {};
+      
+      localUsers.forEach(user => {
+        if (user?.createdAt) {
+          // Parse as UTC date to avoid timezone shifts
+          const date = new Date(user.createdAt);
+          const utcMonth = date.getUTCMonth();
+          const utcYear = date.getUTCFullYear();
+          
+          // Create a UTC-based month key (e.g., "May 2024")
+          const monthNames = [
+            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+          ];
+          const monthKey = `${monthNames[utcMonth]} ${utcYear}`;
+          
+          monthlyCounts[monthKey] = (monthlyCounts[monthKey] || 0) + 1;
+        }
+      });
 
-      return Object.entries(monthlyCounts).map(([month, count]) => ({
-        month,
-        users: count
-      }));
+      // Convert to array and sort chronologically
+      const sortedData = Object.entries(monthlyCounts)
+        .map(([month, count]) => ({ month, users: count }))
+        .sort((a, b) => {
+          const [aMonth, aYear] = a.month.split(' ');
+          const [bMonth, bYear] = b.month.split(' ');
+          const monthNames = [
+            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+          ];
+          const aDate = new Date(parseInt(aYear), monthNames.indexOf(aMonth));
+          const bDate = new Date(parseInt(bYear), monthNames.indexOf(bMonth));
+          return aDate - bDate;
+        });
+
+      return sortedData;
     } catch (error) {
       console.error("Error processing growth data:", error);
       return [];
@@ -100,8 +130,8 @@ const AdminDashboard = () => {
     try {
       return [...localUsers]
         .sort((a, b) => {
-          const dateA = a.createdAt ? parseISO(a.createdAt) : new Date(0);
-          const dateB = b.createdAt ? parseISO(b.createdAt) : new Date(0);
+          const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+          const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
           return dateB - dateA;
         })
         .slice(0, 5);

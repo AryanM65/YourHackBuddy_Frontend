@@ -169,7 +169,7 @@ const TeamSubmissionsPage = () => {
         </div>
         
         {/* Organization Actions */}
-        {(user?.role === 'Organization' || user?.role === 'Admin') && isHackathonOrganizer && (
+        {/* {(user?.role === 'Organization' || user?.role === 'Admin') && isHackathonOrganizer && (
           <div className="bg-white rounded-xl shadow-md p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               Organization Actions
@@ -191,7 +191,7 @@ const TeamSubmissionsPage = () => {
               </button>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

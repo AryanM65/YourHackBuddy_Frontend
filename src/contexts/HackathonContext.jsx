@@ -57,6 +57,9 @@ export const HackathonProvider = ({ children }) => {
       setLoading(true);
       const res = await axios.post(`${BASE_URL}/addhackathon`, hackathonData, {
         withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        }
       });
       await fetchAllHackathons();
       return res.data; // In case caller needs the new hackathon
@@ -108,21 +111,21 @@ export const HackathonProvider = ({ children }) => {
         
         // Update orgHackathons
         setOrgHackathons(prev => 
-          prev.map(h => h._id === hackathonId ? updatedHackathon : h)
+          prev.map(h => h._id === id ? updatedHackathon : h)
         );
         
         // Update hackathons (all hackathons)
         setHackathons(prev => 
-          prev.map(h => h._id === hackathonId ? updatedHackathon : h)
+          prev.map(h => h._id === id ? updatedHackathon : h)
         );
         
         // Update myHackathons
         setMyHackathons(prev => 
-          prev.map(h => h._id === hackathonId ? updatedHackathon : h)
+          prev.map(h => h._id === id ? updatedHackathon : h)
         );
         
         // Update selectedHackathon if it's the current one
-        if (selectedHackathon && selectedHackathon._id === hackathonId) {
+        if (selectedHackathon && selectedHackathon._id === id) {
           setSelectedHackathon(updatedHackathon);
         }
         

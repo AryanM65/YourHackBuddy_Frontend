@@ -30,47 +30,59 @@ const TeamAnalytics = () => {
         const teamsData = await getTeamsForHackathon(hackathonId);
         setTeams(teamsData);
         
-        // Filter shortlisted teams
         const shortlisted = teamsData.filter(team => team.shortlisted);
         setShortlistedTeams(shortlisted);
         
-        // Filter registered teams
         const registered = teamsData.filter(team => team.isRegistered);
         setRegisteredTeams(registered);
         
-        // Analyze team sizes
         const sizeCounts = teamsData.reduce((acc, team) => {
           const size = team.members.length;
           acc[size] = (acc[size] || 0) + 1;
           return acc;
         }, {});
         
-        const sizeData = Object.entries(sizeCounts).map(([size, count]) => ({
-          name: `${size} members`,
-          value: count
-        }));
+        const sizeData = Object.entries(sizeCounts)
+          .map(([size, count]) => ({
+            size: parseInt(size),
+            count
+          }))
+          .sort((a, b) => a.size - b.size)
+          .map(item => ({
+            name: `${item.size} member${item.size !== 1 ? 's' : ''}`,
+            value: item.count
+          }));
+          
         setTeamSizes(sizeData);
         
-        // Prepare monthly registration data
-        const monthlyData = teamsData.reduce((acc, team) => {
+        const registrationsByMonth = {};
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        monthNames.forEach(month => {
+          registrationsByMonth[month] = 0;
+        });
+        
+        teamsData.forEach(team => {
           const date = new Date(team.createdAt);
           const month = date.toLocaleString('default', { month: 'short' });
-          
-          const existing = acc.find(item => item.month === month);
-          if (existing) {
-            existing.count++;
-          } else {
-            acc.push({ month, count: 1 });
-          }
-          return acc;
-        }, []);
+          registrationsByMonth[month] = (registrationsByMonth[month] || 0) + 1;
+        });
+        
+        const monthlyData = Object.entries(registrationsByMonth)
+          .map(([month, count]) => ({ month, count }))
+          .sort((a, b) => monthNames.indexOf(a.month) - monthNames.indexOf(b.month));
         
         setMonthlyRegistrations(monthlyData);
         
-        // Get submission data if available
         if (currentTeam) {
           const submissions = await getTeamSubmissions(currentTeam._id, hackathonId);
-          setSubmissionData(submissions);
+          const sortedSubmissions = submissions
+            .map(sub => ({
+              ...sub,
+              submittedAt: new Date(sub.submittedAt)
+            }))
+            .sort((a, b) => a.submittedAt - b.submittedAt);
+          setSubmissionData(sortedSubmissions);
         }
       } catch (err) {
         console.error('Error fetching team analytics:', err);
@@ -80,11 +92,16 @@ const TeamAnalytics = () => {
     fetchData();
   }, [hackathonId, currentTeam]);
 
-  if (loading) return <div className="text-center py-8">Loading analytics...</div>;
-  if (error) return <div className="text-center py-8 text-red-500">Error: {error}</div>;
+  if (loading) return <div className="bg-gray-900 min-h-screen pt-24 text-center py-8 text-gray-300">Loading analytics...</div>;
+  if (error) return <div className="bg-gray-900 min-h-screen pt-24 text-center py-8 text-red-400">Error: {error}</div>;
+
+  const lineChartData = submissionData.map(sub => ({
+    date: sub.submittedAt.toLocaleDateString(),
+    score: sub.score || 0
+  }));
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="bg-gray-900 text-gray-100 min-h-screen pt-24 p-6">
       <h1 className="text-3xl font-bold mb-6 text-purple-400">Team Analytics</h1>
       
       {/* Stats Overview */}
@@ -106,8 +123,9 @@ const TeamAnalytics = () => {
         />
         <StatCard 
           title="Avg Team Size" 
-          value={teams.length > 0 ? (teams.reduce((sum, team) => sum + team.members.length, 0) / teams.length)
-             : 0
+          value={teams.length > 0 
+            ? (teams.reduce((sum, team) => sum + team.members.length, 0) / teams.length).toFixed(1)
+            : 0
           } 
           icon={<FaUsers className="text-blue-400" />} 
         />
@@ -160,10 +178,7 @@ const TeamAnalytics = () => {
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-semibold mb-4 text-purple-300">Team Submissions</h2>
           <LineChart 
-            data={submissionData.map(sub => ({
-              date: new Date(sub.submittedAt).toLocaleDateString(),
-              score: sub.score || 0
-            }))} 
+            data={lineChartData} 
             title="Submission Scores Over Time" 
             dataKey="score" 
             color="#82ca9d" 

@@ -36,6 +36,7 @@ export const TeamProvider = ({ children }) => {
         { withCredentials: true }
       );
       setCurrentTeam(data.team);
+      setTeams(prevTeams => [...prevTeams, data.team]);
       return data;
     } catch (err) {
       handleError(err);
@@ -87,6 +88,7 @@ export const TeamProvider = ({ children }) => {
         { joinCode },
         { withCredentials: true }
       );
+      setCurrentTeam(data.team);
       return data;
     } catch (err) {
       handleError(err);

@@ -282,7 +282,7 @@ const OrganizerDashboard = () => {
     }
     
     return (
-      <span className={`px-2 py-1 rounded-full text-xs flex items-center ${bgColor} ${textColor}`}>
+      <span className={`px-2 py-1 rounded-full text-xs inline-flex items-center ${bgColor} ${textColor}`}>
         {icon} {status || 'unknown'}
       </span>
     );
@@ -293,7 +293,7 @@ const OrganizerDashboard = () => {
       return (
         <EmptyState 
           message={`You don't have any ${statusFilter === 'all' ? '' : statusFilter.toLowerCase() + ' '}hackathons`} 
-          action={() => navigate('/create-hackathon')} 
+          action={() => navigate('/add-hackathon')} 
         />
       );
     }
@@ -318,7 +318,7 @@ const OrganizerDashboard = () => {
                 onClick={() => navigate(`/hackathon/${hackathon._id}`)}
               >
                 <td className="py-4 font-medium">{hackathon.title || 'Untitled Hackathon'}</td>
-                <td className="py-4">
+                <td className="py-4 min-w-[100px]">
                   <StatusBadge status={hackathon.status} />
                 </td>
                 <td className="py-4">{hackathon.teams?.length || 0}</td>
@@ -464,7 +464,7 @@ const OrganizerDashboard = () => {
             <div className="flex gap-4">
               <StatusFilter />
               <button
-                onClick={() => navigate('/create-hackathon')}
+                onClick={() => navigate('/add-hackathon')}
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2 transition transform hover:scale-105 duration-300 whitespace-nowrap"
               >
                 <FaPlus /> Create New

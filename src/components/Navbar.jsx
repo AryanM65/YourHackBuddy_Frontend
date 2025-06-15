@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
@@ -25,14 +24,37 @@ const Navbar = () => {
   const serverUrl = import.meta.env.VITE_SERVER_URL;
 
   const handleLogout = async () => {
+    setNotifications([]); // Clear notifications on logout
     await logout();
     navigate("/login");
   };
 
   const avatarLetter = user?.name ? user.name.charAt(0).toUpperCase() : "";
 
+  // Fetch notifications when component mounts and when user changes
   useEffect(() => {
-    if (showPopup) {
+    if (!user) return;
+
+    const fetchNotifications = () => {
+      axios
+        .get(`${serverUrl}/api/v1/get-all-notifications`, { withCredentials: true })
+        .then((res) => {
+          if (res.data.notifications) setNotifications(res.data.notifications);
+        })
+        .catch((err) => console.error("Error fetching notifications:", err));
+    };
+
+    // Initial fetch
+    fetchNotifications();
+
+    // Optional: Set up polling (fetch every 30 seconds)
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [user, serverUrl]);
+
+  // Additional fetch when popup is opened to ensure fresh data
+  useEffect(() => {
+    if (showPopup && user) {
       axios
         .get(`${serverUrl}/api/v1/get-all-notifications`, { withCredentials: true })
         .then((res) => {
@@ -40,7 +62,7 @@ const Navbar = () => {
         })
         .catch((err) => console.error("Error fetching notifications:", err));
     }
-  }, [showPopup, serverUrl]);
+  }, [showPopup, serverUrl, user]);
 
   const markAsRead = (id) => {
     axios
@@ -107,7 +129,7 @@ const Navbar = () => {
     }`}>
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center relative">
-          <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-purple-500 to-pink-500 bg-clip-text text-transparent hover:from-purple-300 hover:to-pink-400 transition-all duration-300">
+          <Link to={user ? "/home" : "/"} className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-purple-500 to-pink-500 bg-clip-text text-transparent hover:from-purple-300 hover:to-pink-400 transition-all duration-300">
             YourHackBuddy
           </Link>
 
@@ -144,7 +166,7 @@ const Navbar = () => {
                 Hackathons
               </Link>
 
-              {/* Add Hackathon Button (Admin Only) */}
+              {/* Add Hackathon Button (Organization Only) */}
               {user.role === 'Organization' && (
                 <Link 
                   to="/add-hackathon" 
@@ -153,13 +175,23 @@ const Navbar = () => {
                   Add Hackathon
                 </Link>
               )}
+              
+              {/* Admin Specific Buttons */}
               {user.role === 'Admin' && (
-                <Link 
-                  to="/view-complaints" 
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 transition-all duration-300 font-medium shadow-lg hover:shadow-blue-500/25"
-                >
-                  View Complaints
-                </Link>
+                <>
+                  <Link 
+                    to="/view-complaints" 
+                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 transition-all duration-300 font-medium shadow-lg hover:shadow-blue-500/25"
+                  >
+                    View Complaints
+                  </Link>
+                  <Link 
+                    to="/admin/add-announcement" 
+                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500 transition-all duration-300 font-medium shadow-lg hover:shadow-purple-500/25"
+                  >
+                    Add Announcement
+                  </Link>
+                </>
               )}
 
               <button
@@ -247,10 +279,20 @@ const Navbar = () => {
 
               <Link
                 to="/dashboard"
-                className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center font-bold text-white uppercase select-none cursor-pointer hover:from-purple-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-purple-500/25"
+                className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white uppercase select-none cursor-pointer hover:shadow-purple-500/25 transition-all duration-300 shadow-lg overflow-hidden"
                 title={user.name}
               >
-                {avatarLetter}
+                {user.profilePicture ? (
+                  <img 
+                    src={user.profilePicture} 
+                    alt={user.name} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center hover:from-purple-500 hover:to-pink-500">
+                    {avatarLetter}
+                  </div>
+                )}
               </Link>
 
               {user.role !== 'Admin' && <Link to="/complaints" className="text-gray-300 hover:text-purple-400 transition-colors duration-300 font-medium">

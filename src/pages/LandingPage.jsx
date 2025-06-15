@@ -25,9 +25,9 @@ const LandingPage = () => {
   ];
 
   const stats = [
-    { number: "10K+", label: "Active Hackers" },
-    { number: "500+", label: "Hackathons" },
-    { number: "2K+", label: "Teams Formed" },
+    { number: "100+", label: "Active Hackers" },
+    { number: "50+", label: "Hackathons" },
+    { number: "70+", label: "Teams Formed" },
     { number: "95%", label: "Success Rate" }
   ];
 
@@ -238,19 +238,19 @@ const LandingPage = () => {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                name: "Alex Chen",
+                name: "Manit Jain",
                 role: "Full Stack Developer",
-                quote: "Found my dream team in minutes! We won our first hackathon together and now we're building a startup.",
+                quote: "Found my dream team in minutes! We won our first hackathon together.",
                 avatar: "🧑‍💻"
               },
               {
-                name: "Sarah Johnson",
+                name: "Abhinay Parashar",
                 role: "UI/UX Designer",
-                quote: "The matching algorithm is incredible. I've never worked with such talented and compatible teammates before.",
+                quote: "I've never worked with such talented and compatible teammates before.",
                 avatar: "👩‍🎨"
               },
               {
-                name: "David Rodriguez",
+                name: "Rahul Sharma",
                 role: "Data Scientist",
                 quote: "YourHackBuddy helped me find teammates who perfectly complement my skills. We've won 3 hackathons so far!",
                 avatar: "👨‍🔬"

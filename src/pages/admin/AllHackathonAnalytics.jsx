@@ -47,28 +47,42 @@ const AllHackathonAnalytics = () => {
 
   // Process data for charts from approved hackathons
   const processAnalyticsData = () => {
-    // Monthly growth data
-    const monthlyGrowth = {};
+    // Monthly growth data with proper date handling
+    const monthlyCounts = {};
+    
     approvedHackathons.forEach(hackathon => {
-      const month = new Date(hackathon.startDate).toLocaleString('default', { 
-        month: 'short',
-        year: 'numeric'
-      });
-      monthlyGrowth[month] = (monthlyGrowth[month] || 0) + 1;
+      const date = new Date(hackathon.startDate);
+      // Use UTC methods to avoid timezone issues
+      const year = date.getUTCFullYear();
+      const month = date.getUTCMonth(); // 0-11
+      const monthYearKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+      
+      if (!monthlyCounts[monthYearKey]) {
+        monthlyCounts[monthYearKey] = {
+          count: 0,
+          monthName: date.toLocaleString('default', { month: 'short' }),
+          year
+        };
+      }
+      monthlyCounts[monthYearKey].count++;
     });
 
-    const growthData = Object.entries(monthlyGrowth).map(([month, count]) => ({
-      month,
-      count
-    }));
+    // Convert to array and sort chronologically
+    const growthData = Object.entries(monthlyCounts)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([_, { monthName, year, count }]) => ({
+        month: `${monthName} ${year}`,
+        count
+      }));
 
     // Top hackathons by team count
     const sizeData = [...approvedHackathons]
       .sort((a, b) => (b.teams?.length || 0) - (a.teams?.length || 0))
       .slice(0, 4)
       .map(hackathon => ({
-        name: hackathon.title,
-        teams: hackathon.teams?.length || 0
+        name: hackathon.title.substring(0, 20) + (hackathon.title.length > 20 ? '...' : ''),
+        teams: hackathon.teams?.length || 0,
+        fullName: hackathon.title
       }));
 
     // Recent hackathons (past approved hackathons)
@@ -179,6 +193,7 @@ const AllHackathonAnalytics = () => {
             title="Approved Hackathon Growth" 
             subtitle="Monthly approved hackathons"
             dataKey="count" 
+            xAxisKey="month"
             color="#10b981"
           />
         </div>
@@ -188,6 +203,7 @@ const AllHackathonAnalytics = () => {
             title="Teams by Hackathon" 
             subtitle="Top 4 approved hackathons"
             dataKey="teams" 
+            nameKey="name"
             color="#10b981"
           />
         </div>

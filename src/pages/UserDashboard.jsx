@@ -14,13 +14,13 @@ import {
   FaBriefcase, 
   FaUserFriends,
   FaCode,
-  FaIdBadge
+  FaIdBadge,
+  FaChevronDown,
+  FaChevronUp
 } from 'react-icons/fa';
 
 const UserDashboard = () => {
-
   const { user, loading: userLoading } = useUser();
-  console.log("user1", user);
   const { 
     getUserTeams, 
     teams, 
@@ -33,12 +33,17 @@ const UserDashboard = () => {
   } = useHackathon();
   const navigate = useNavigate();
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [showAllTeams, setShowAllTeams] = useState(false);
+  const [showAllHackathons, setShowAllHackathons] = useState(false);
+  
+  // Number of items to show initially
+  const INITIAL_TEAMS_TO_SHOW = 2;
+  const INITIAL_HACKATHONS_TO_SHOW = 2;
 
   const fetchData = useCallback(async () => {
     if (!user?._id || initialLoadComplete) return;
-    console.log("user", user);
+    
     try {
-      console.log("Fetching user teams and hackathons");
       await Promise.all([
         getUserTeams(user._id),
         fetchMyHackathons()
@@ -46,7 +51,6 @@ const UserDashboard = () => {
       setInitialLoadComplete(true);
     } catch (error) {
       console.error("Data fetch error:", error);
-      // Optionally set error state here
     }
   }, [user?._id, getUserTeams, fetchMyHackathons, initialLoadComplete]);
 
@@ -62,19 +66,26 @@ const UserDashboard = () => {
     );
   }
 
+  // Calculate teams to display
+  const displayedTeams = showAllTeams 
+    ? teams 
+    : teams.slice(0, INITIAL_TEAMS_TO_SHOW);
+  
+  // Calculate hackathons to display
+  const displayedHackathons = showAllHackathons 
+    ? myHackathons 
+    : myHackathons.slice(0, INITIAL_HACKATHONS_TO_SHOW);
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <br></br>
+      <br></br>
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div className="flex items-center gap-4">
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               Welcome Back, {user?.name}
-              <br></br>
             </h1>
             {user?.role === 'Admin' && (
               <span className="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm">
@@ -245,12 +256,9 @@ const UserDashboard = () => {
                   <FaUsers className="text-purple-400" />
                   Your Teams
                 </h2>
-                {/* <Link
-                  to="/teams"
-                  className="text-purple-400 hover:text-purple-300 transition-colors"
-                >
-                  View All →
-                </Link> */}
+                <div className="text-sm text-purple-400">
+                  {teams.length} {teams.length === 1 ? 'team' : 'teams'}
+                </div>
               </div>
 
               {teamsLoading ? (
@@ -258,27 +266,50 @@ const UserDashboard = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
                 </div>
               ) : teams?.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {teams.map((team) => (
-                    <div
-                      key={team._id}
-                      className="p-4 bg-gray-700/20 rounded-lg hover:bg-gray-700/30 transition-colors"
-                    >
-                      <h3 className="font-semibold mb-2">{team.name}</h3>
-                      <p className="text-sm text-gray-400 mb-2">
-                        {team.hackathon?.name || 'General Team'}
-                      </p>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-purple-400">
-                          {team.members.length} members
-                        </span>
-                        <span className="px-2 py-1 bg-purple-900/30 text-purple-300 rounded-full text-xs">
-                          {team.status}
-                        </span>
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {displayedTeams.map((team) => (
+                      <div
+                        key={team._id}
+                        className="p-4 bg-gray-700/20 rounded-lg hover:bg-gray-700/30 transition-colors"
+                      >
+                        <h3 className="font-semibold mb-2">{team.name}</h3>
+                        <p className="text-sm text-gray-400 mb-2">
+                          {team.hackathon?.name || 'General Team'}
+                        </p>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-purple-400">
+                            {team.members.length} members
+                          </span>
+                          <span className="px-2 py-1 bg-purple-900/30 text-purple-300 rounded-full text-xs">
+                            {team.status}
+                          </span>
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                  
+                  {teams.length > INITIAL_TEAMS_TO_SHOW && (
+                    <div className="mt-6 text-center">
+                      <button
+                        onClick={() => setShowAllTeams(!showAllTeams)}
+                        className="px-4 py-2 text-purple-400 hover:text-purple-300 flex items-center justify-center gap-2 mx-auto"
+                      >
+                        {showAllTeams ? (
+                          <>
+                            <FaChevronUp className="text-xs" />
+                            Show Less Teams
+                          </>
+                        ) : (
+                          <>
+                            <FaChevronDown className="text-xs" />
+                            View All Teams ({teams.length})
+                          </>
+                        )}
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-6 text-gray-400">
                   You're not part of any teams yet. Join or create one!
@@ -293,12 +324,9 @@ const UserDashboard = () => {
                   <FaTrophy className="text-purple-400" />
                   Your Hackathons
                 </h2>
-                <Link
-                  to="/hackathons"
-                  className="text-purple-400 hover:text-purple-300 transition-colors"
-                >
-                  View All →
-                </Link>
+                <div className="text-sm text-purple-400">
+                  {myHackathons.length} {myHackathons.length === 1 ? 'hackathon' : 'hackathons'}
+                </div>
               </div>
 
               {hackathonsLoading ? (
@@ -306,31 +334,54 @@ const UserDashboard = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
                 </div>
               ) : myHackathons?.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {myHackathons.map((hackathon) => (
-                    <div
-                      key={hackathon._id}
-                      className="p-4 bg-gray-700/20 rounded-lg hover:bg-gray-700/30 transition-colors"
-                    >
-                      <h3 className="font-semibold mb-2">{hackathon.title}</h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
-                        <FaCalendarAlt />
-                        <span>
-                          {new Date(hackathon.startDate).toLocaleDateString()} -{' '}
-                          {new Date(hackathon.endDate).toLocaleDateString()}
-                        </span>
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {displayedHackathons.map((hackathon) => (
+                      <div
+                        key={hackathon._id}
+                        className="p-4 bg-gray-700/20 rounded-lg hover:bg-gray-700/30 transition-colors"
+                      >
+                        <h3 className="font-semibold mb-2">{hackathon.title}</h3>
+                        <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                          <FaCalendarAlt />
+                          <span>
+                            {new Date(hackathon.startDate).toLocaleDateString()} -{' '}
+                            {new Date(hackathon.endDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-purple-400">
+                            {hackathon.status}
+                          </span>
+                          <span className="px-2 py-1 bg-purple-900/30 text-purple-300 rounded-full text-xs">
+                            {hackathon.teams?.length || 0} teams
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-purple-400">
-                          {hackathon.status}
-                        </span>
-                        <span className="px-2 py-1 bg-purple-900/30 text-purple-300 rounded-full text-xs">
-                          {hackathon.teams?.length || 0} teams
-                        </span>
-                      </div>
+                    ))}
+                  </div>
+                  
+                  {myHackathons.length > INITIAL_HACKATHONS_TO_SHOW && (
+                    <div className="mt-6 text-center">
+                      <button
+                        onClick={() => setShowAllHackathons(!showAllHackathons)}
+                        className="px-4 py-2 text-purple-400 hover:text-purple-300 flex items-center justify-center gap-2 mx-auto"
+                      >
+                        {showAllHackathons ? (
+                          <>
+                            <FaChevronUp className="text-xs" />
+                            Show Less Hackathons
+                          </>
+                        ) : (
+                          <>
+                            <FaChevronDown className="text-xs" />
+                            View All Hackathons ({myHackathons.length})
+                          </>
+                        )}
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-6 text-gray-400">
                   You haven't joined any hackathons yet. Find one to participate in!

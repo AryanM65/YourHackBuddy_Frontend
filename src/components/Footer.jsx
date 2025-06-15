@@ -43,10 +43,10 @@ const Footer = () => {
             <h4 className="text-purple-300 font-semibold text-lg mb-3">Hackathons</h4>
             <ul className="space-y-2">
               <li><Link to="/hackathons" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Current Challenges</Link></li>
-              <li><Link to="/hackathons/past" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Past Events</Link></li>
-              <li><Link to="/hackathons/create" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Host a Hackathon</Link></li>
-              <li><Link to="/leaderboard" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Leaderboard</Link></li>
-              <li><Link to="/projects" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Featured Projects</Link></li>
+              <li><Link to="/add-hackathon" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Host a Hackathon</Link></li>
+              <li><Link to="/#" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Past Events</Link></li>
+              <li><Link to="/#" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Leaderboard</Link></li>
+              <li><Link to="/#" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Featured Projects</Link></li>
             </ul>
           </div>
 
@@ -54,11 +54,11 @@ const Footer = () => {
           <div className="space-y-3">
             <h4 className="text-purple-300 font-semibold text-lg mb-3">Resources</h4>
             <ul className="space-y-2">
-              <li><Link to="/blog" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Blog</Link></li>
-              <li><Link to="/docs" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Documentation</Link></li>
-              <li><Link to="/tutorials" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Tutorials</Link></li>
-              <li><Link to="/templates" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Starter Templates</Link></li>
-              <li><Link to="/api" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">API Reference</Link></li>
+              <li><Link to="/#" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Blog</Link></li>
+              <li><Link to="/#" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Documentation</Link></li>
+              <li><Link to="/#" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Tutorials</Link></li>
+              <li><Link to="/#" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Starter Templates</Link></li>
+              <li><Link to="/#" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">API Reference</Link></li>
             </ul>
           </div>
 
@@ -67,10 +67,10 @@ const Footer = () => {
             <h4 className="text-purple-300 font-semibold text-lg mb-3">Support</h4>
             <ul className="space-y-2">
               <li><Link to="/contact" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Contact Us</Link></li>
-              <li><Link to="/faq" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">FAQ</Link></li>
-              <li><Link to="/privacy" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Privacy Policy</Link></li>
-              <li><Link to="/terms" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Terms of Service</Link></li>
-              <li><Link to="/conduct" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Code of Conduct</Link></li>
+              <li><Link to="/about" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">About</Link></li>
+              <li><Link to="/#" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Privacy Policy</Link></li>
+              <li><Link to="/#" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Terms of Service</Link></li>
+              <li><Link to="/#" className="text-gray-300 hover:text-purple-400 transition-colors text-sm">Code of Conduct</Link></li>
             </ul>
           </div>
         </div>

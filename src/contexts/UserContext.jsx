@@ -58,6 +58,48 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+    const sendOTP = async (email) => {
+    try {
+      setLoading(true);
+      await axios.post(
+        `${BASE_URL}/api/v1/send-otp`,
+        { email },
+        { withCredentials: true }
+      );
+      return true;
+    } catch (err) {
+      console.error("Failed to send OTP", err);
+      throw err.response?.data?.message || "Failed to send OTP";
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOTP = async (email, otp) => {
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        `${BASE_URL}/api/v1/verify-otp`,
+        { email, otp },
+        { withCredentials: true }
+      );
+      
+      // Immediately update local state
+      saveUser(res.data?.user || null);
+      
+      // Force re-check authentication
+      await fetchUser();
+      
+      navigate("/");
+      return res.data;
+    } catch (err) {
+      console.error("OTP verification failed", err);
+      throw err.response?.data?.message || "Invalid OTP. Please try again.";
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchUser();
   }, []);
@@ -67,6 +109,9 @@ export const UserProvider = ({ children }) => {
       setLoading(true);
       const res = await axios.post(`${BASE_URL}/api/v1/signup`, formData, {
         withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        }
       });
       //saveUser(res.data.user);
       navigate("/login");
@@ -140,7 +185,9 @@ export const UserProvider = ({ children }) => {
         logout,
         fetchUser,
         updateProfile,
-        fetchAllUsers
+        fetchAllUsers,
+        sendOTP,
+        verifyOTP
       }}
     >
       {children}
