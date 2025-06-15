@@ -179,7 +179,7 @@ const HackathonDetails = () => {
                 )}
                 
                 {/* Your Team Button - only shown if user has a team */}
-                {!hasTeam && !checkingTeam && (
+                {!checkingTeam && (
                   <button
                     onClick={() => navigate(`/hackathon/${id}/your-team`)}
                     className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center gap-3 font-semibold"
